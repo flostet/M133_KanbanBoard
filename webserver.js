@@ -1,5 +1,4 @@
 import { Application, Router, send } from "https://deno.land/x/oak@v6.3.1/mod.ts"
-import { v4 } from "https://deno.land/std/uuid/mod.ts";
 const app = new Application()
 const router = new Router()
 
@@ -11,9 +10,29 @@ const columns = [
   { id: 2, title: 'Done' },
 ];
 
+let IDcounter = 0;
+
+cards = [
+  ...cards,
+  {
+      "description": "Run the tests",
+      "status": "Done",
+      "id": IDcounter++,
+  },
+  {
+      "description": "create new Project",
+      "status": "in Progress",
+      "id": IDcounter++,
+  },
+  {
+      "description": "design UI",
+      "status": "ToDo",
+      "id": IDcounter++,
+  }
+];
 
 router
-    .get('/columns', (context) => (context.response.body = columns))
+    .get('/columns', context => context.response.body = columns)
     .get("/cards", context => context.response.body = cards)
     .get("/cards/:id", context => {
         const index = cards.findIndex(c => c.id == context.params.id);
@@ -22,7 +41,7 @@ router
     })
     .post("/cards", async context => {
         const card = await context.request.body({ type: "json" }).value;
-        card.id = v4.generate();
+        card.id = IDcounter++;
         cards = [
             ...cards,
             card
