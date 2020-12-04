@@ -15,3 +15,10 @@
   border-color: black;
 }
 
+button {
+  margin: 2px;
+}
+
+li {
+  list-style: none;
+}

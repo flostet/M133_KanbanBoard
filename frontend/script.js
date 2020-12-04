@@ -30,7 +30,7 @@ async function loadCardsAndColumns(){
     createCards(cards);
 }
 
-// Function to add the Card to API 
+
 async function postCard(card){
     fetch('/cards', {
         method: 'post',
@@ -125,7 +125,7 @@ function createCards(cards){
 // Converts the Json to HTML Object
 function createCardHtml(card){
     let listItem = document.createElement("li");
-    listItem.draggable = true;
+
     let div = document.createElement("div");
     div.id = card.id;
     div.class = "card";
@@ -133,11 +133,40 @@ function createCardHtml(card){
     let p = document.createElement("p");
     p.innerText = card.description;
 
+    div.appendChild(p);
+
+    if(card.status == "ToDo"){
+        let rightMoveButton = document.createElement("button");
+        rightMoveButton.innerText = ">";
+        rightMoveButton.addEventListener('click', listener => onRightMove(listener));
+
+        div.appendChild(rightMoveButton);
+    }
+    else if(card.status == "Done") {
+        let leftMoveButton = document.createElement("button");
+        leftMoveButton.innerText = "<";
+        leftMoveButton.addEventListener('click', listener => onLeftMove(listener));
+        
+        div.appendChild(leftMoveButton);
+    }
+    else {
+        let leftMoveButton = document.createElement("button");
+        leftMoveButton.innerText = "<";
+        leftMoveButton.addEventListener('click', listener => onLeftMove(listener));
+
+        let rightMoveButton = document.createElement("button");
+        rightMoveButton.innerText = ">";
+        rightMoveButton.addEventListener('click', listener => onRightMove(listener));
+
+        div.appendChild(leftMoveButton);
+        div.appendChild(rightMoveButton);
+    }
+    
+
     let deleteButton = document.createElement("button");
     deleteButton.innerText = "X";
     deleteButton.addEventListener('click', listener => onDeleteCard(listener));
 
-    div.appendChild(p);
     div.appendChild(deleteButton);
 
     listItem.appendChild(div);
@@ -166,6 +195,40 @@ function onDeleteCard(listener){
     deleteCard(id);
 }
 
+async function onLeftMove(listener){
+    let target = listener.target;
+    let id = target.parentElement.id;
+    let card = await getCard(id);
+
+    if(card.status == "in Progress"){
+        card.status = "ToDo";
+    }
+    else if (card.status == "Done"){
+        card.status = "in Progress";
+    }
+
+    console.log(card.status);
+
+    putCard(card, id);
+}
+
+async function onRightMove(listener){
+    let target = listener.target;
+    let id = target.parentElement.id;
+    let card = await getCard(id);
+
+    if(card.status == "ToDo"){
+        card.status = "in Progress";
+    }
+    else if (card.status == "in Progress"){
+        card.status = "Done";
+    }
+
+    console.log(card.status);
+
+    putCard(card, id);
+}
+
 // Gets all Columns from API
 async function getColumns() {
     let response = await fetch('http://localhost:8000/columns', {
@@ -180,4 +243,11 @@ async function getCards() {
         method: 'GET',
     });
     return await response.json();
+}
+
+async function getCard(id) {
+    let result = await fetch(`http://localhost:8000/cards/${id}`, {
+        method: 'GET',
+    });
+    return await result.json();
 }

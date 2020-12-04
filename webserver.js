@@ -16,7 +16,7 @@ cards = [
   ...cards,
   {
       "description": "Run the tests",
-      "status": "Done",
+      "status": "ToDo",
       "id": IDcounter++,
   },
   {
@@ -26,7 +26,7 @@ cards = [
   },
   {
       "description": "design UI",
-      "status": "ToDo",
+      "status": "Done",
       "id": IDcounter++,
   }
 ];
@@ -35,10 +35,10 @@ router
     .get('/columns', context => context.response.body = columns)
     .get("/cards", context => context.response.body = cards)
     .get("/cards/:id", context => {
-        const index = cards.findIndex(c => c.id == context.params.id);
-        context.response.body = cards[index]
-        
-    })
+      const index = cards.findIndex(c => c.id == context.params.id);
+      context.response.body = cards[index]
+      
+  })
     .post("/cards", async context => {
         const card = await context.request.body({ type: "json" }).value;
         card.id = IDcounter++;
