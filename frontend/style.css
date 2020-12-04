@@ -6,6 +6,26 @@
 .FlexContainer {
     display: flex;
     flex-direction: row;
+    font-size: large;
+    justify-content: center;
+    margin-left: 30%;
+    margin-right: 30%;
+    margin-top: 5%;
+    padding-left: 5%;
+    padding-right: 5%;
+    padding-top: 2%;
+    padding-bottom: 2%;
+    border: 1px solid #000;
+    text-align: center;
+    color: black;
+    background-color: rgba(200, 200, 200, 0.8);
+}
+
+li {
+    display: inline-block;
+    *display: inline;
+    background: rgb(153, 153, 153);
+    margin: 5px;
 }
 
 .column {
@@ -28,5 +48,5 @@ li {
 }
 
 .drag-over {
-    border: dashed 3px red;
+    border: solid 2px rgb(0, 0, 0);
 }
