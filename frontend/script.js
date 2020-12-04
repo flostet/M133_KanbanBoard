@@ -1,13 +1,33 @@
+let cards = [];
+let columns = [];
+
 window.addEventListener('load', async () => {
-    let columns = await getColumns();
-    let cards = await getCards();
+    loadCardsAndColumns();
+});
+
+async function loadCardsAndColumns(){
+    columns = await getColumns();
+    cards = await getCards();
+
+    document.getElementsByTagName('BODY')[0].innerHTML = '';
 
     for (let i = 0; i < columns.length; i++) {
         createColumn(columns[i]);
     }
 
     createCards(cards);
-});
+}
+
+async function postCard(card){
+    fetch('/cards', {
+        method: 'post',
+        headers: {'Content-Type': 'application/json' },
+        body: JSON.stringify(card)
+    });
+    
+    loadCardsAndColumns();
+}
+
 
 // Function to create the Columns
 function createColumn(column){
@@ -33,11 +53,14 @@ function createColumn(column){
     let newCardInput = document.createElement("input");
     newCardInput.placeholder = "Add New Card";
     newCardInput.className = "addCard";
+    newCardInput.id = "add" + column.title;
     newCardInput.type = "text";
     footer.appendChild(newCardInput);
 
     let newCardButton = document.createElement("button");
     newCardButton.innerText = "+";
+    newCardButton.id = "addBtn" + column.title;
+    newCardButton.addEventListener('click', listener => addNewCard(listener))
     footer.appendChild(newCardButton);
 }
 
@@ -45,7 +68,7 @@ function createColumn(column){
 function createCards(cards){
     cards.forEach(card => {
         cardHtml = createCardHtml(card);
-
+        console.log(card.description);
         if(card.status == "ToDo"){
             document.getElementById("ToDo").appendChild(cardHtml);
         }
@@ -70,12 +93,25 @@ function createCardHtml(card){
 
     let deleteButton = document.createElement("button");
     deleteButton.innerText = "X";
+    deleteButton.addEventListener('click', listener => deleteCard(listener))
 
     div.appendChild(p);
     div.appendChild(deleteButton);
 
     listItem.appendChild(div);
     return listItem;
+}
+
+function addNewCard(listener){
+    let target = listener.target;
+    let status = target.id.replace("addBtn", "");
+    let description = document.getElementById(("add" + status)).value;
+    document.getElementById(("add" + status)).value = "";
+    card = {
+        "description": description,
+        "status": status,
+    }
+    postCard(card);
 }
 
 async function getColumns() {
@@ -91,4 +127,3 @@ async function getCards() {
     });
     return await response.json();
 }
-
