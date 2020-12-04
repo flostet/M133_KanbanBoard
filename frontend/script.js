@@ -14,6 +14,15 @@ async function loadCardsAndColumns(){
 
     document.getElementsByTagName('BODY')[0].innerHTML = '';
 
+    let title = document.createElement("h3");
+    title.innerText = "Kanban Board by Florian und Max";
+    document.body.appendChild(title);
+
+    let flexContainer = document.createElement("div");
+    flexContainer.id = "FlexContainer";
+    flexContainer.className = "FlexContainer";
+    document.body.appendChild(flexContainer);
+
     for (let i = 0; i < columns.length; i++) {
         createColumn(columns[i]);
     }
@@ -53,9 +62,11 @@ async function putCard(card, id){
 
 // Function to create the Columns
 function createColumn(column){
+    let flexContainer = document.getElementById("FlexContainer");
+
     let kanbanBoard = document.createElement("div");
     kanbanBoard.className = "kanbanBoard";
-    document.body.appendChild(kanbanBoard);
+    flexContainer.appendChild(kanbanBoard);
 
     let col = document.createElement("div");
     col.className = "column";
@@ -63,6 +74,15 @@ function createColumn(column){
 
     let header = document.createElement("header")
     header.innerText = column.title;
+    if(column.title == "ToDo"){
+        header.style.backgroundColor = "orange";
+    }
+    else if(column.title == "in Progress"){
+        header.style.backgroundColor = "lightblue";
+    }
+    else if(column.title == "Done"){
+        header.style.backgroundColor = "green";
+    }
     col.appendChild(header);
 
     let list = document.createElement("ul");
@@ -105,6 +125,7 @@ function createCards(cards){
 // Converts the Json to HTML Object
 function createCardHtml(card){
     let listItem = document.createElement("li");
+    listItem.draggable = true;
     let div = document.createElement("div");
     div.id = card.id;
     div.class = "card";
@@ -118,8 +139,6 @@ function createCardHtml(card){
 
     div.appendChild(p);
     div.appendChild(deleteButton);
-    div.appendChild(leftButton);
-    div.appendChild(rightButton);
 
     listItem.appendChild(div);
     return listItem;

@@ -1,0 +1,17 @@
+* {
+  margin: 3;
+  font-family: "Roboto", sans-serif;
+}
+
+.FlexContainer {
+  display: flex;
+  flex-direction: row;
+}
+
+.column {
+  flex: 33%;
+  width: auto;
+  padding: 0px 10px;
+  border-color: black;
+}
+
