@@ -3,12 +3,12 @@ let cards = [];
 let columns = [];
 
 // Loads all Cards and Columns when window loads
-window.addEventListener('load', async () => {
+window.addEventListener('load', async() => {
     loadCardsAndColumns();
 });
 
 // Function to load all Cards and Columns
-async function loadCardsAndColumns(){
+async function loadCardsAndColumns() {
     columns = await getColumns();
     cards = await getCards();
 
@@ -24,44 +24,44 @@ async function loadCardsAndColumns(){
     document.body.appendChild(flexContainer);
 
     for (let i = 0; i < columns.length; i++) {
-        createColumn(columns[i]);
+        await createColumn(columns[i]);
     }
 
     createCards(cards);
 }
 
 
-async function postCard(card){
+async function postCard(card) {
     fetch('/cards', {
         method: 'post',
-        headers: {'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(card)
     });
-    
+
     loadCardsAndColumns();
 }
 
-async function deleteCard(id){
+async function deleteCard(id) {
     fetch(`/cards/${id}`, {
         method: 'delete',
     });
-    
+
     loadCardsAndColumns();
 }
 
-async function putCard(card, id){
+async function putCard(card, id) {
     fetch(`/cards/${id}`, {
         method: 'put',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(card)
     });
-    
+
     loadCardsAndColumns();
 }
 
 
 // Function to create the Columns
-function createColumn(column){
+async function createColumn(column) {
     let flexContainer = document.getElementById("FlexContainer");
 
     let kanbanBoard = document.createElement("div");
@@ -70,17 +70,20 @@ function createColumn(column){
 
     let col = document.createElement("div");
     col.className = "column";
+    col.id = `"col_${column.title}`;
+    col.addEventListener("dragenter", dragEnter, false);
+    col.addEventListener('dragover', dragOver, false);
+    col.addEventListener('dragleave', dragLeave, false);
+    col.addEventListener('drop', async e => await drop(e), false);
     kanbanBoard.appendChild(col);
 
-    let header = document.createElement("header")
+    let header = document.createElement("header");
     header.innerText = column.title;
-    if(column.title == "ToDo"){
+    if (column.title == "ToDo") {
         header.style.backgroundColor = "orange";
-    }
-    else if(column.title == "in Progress"){
+    } else if (column.title == "in Progress") {
         header.style.backgroundColor = "lightblue";
-    }
-    else if(column.title == "Done"){
+    } else if (column.title == "Done") {
         header.style.backgroundColor = "green";
     }
     col.appendChild(header);
@@ -107,49 +110,86 @@ function createColumn(column){
 }
 
 // prints each card to column
-function createCards(cards){
+function createCards(cards) {
     cards.forEach(card => {
         cardHtml = createCardHtml(card);
-        if(card.status == "ToDo"){
+        if (card.status == "ToDo") {
             document.getElementById("ToDo").appendChild(cardHtml);
-        }
-        else if(card.status == "in Progress"){
+        } else if (card.status == "in Progress") {
             document.getElementById("in Progress").appendChild(cardHtml);
-        }
-        else if(card.status == "Done"){
+        } else if (card.status == "Done") {
             document.getElementById("Done").appendChild(cardHtml);
         }
     })
 }
 
+function dragStart(e) {
+    e.dataTransfer.setData("text/plain", e.target.id);
+    setTimeout(() => {
+        e.target.classList.add("hide");
+    }, 0);
+}
+
+function dragEnter(e) {
+    e.preventDefault();
+    e.target.classList.add('drag-over');
+}
+
+function dragOver(e) {
+    e.preventDefault();
+    e.target.classList.add('drag-over');
+}
+
+function dragLeave(e) {
+    e.preventDefault();
+    e.target.classList.remove('drag-over');
+}
+
+async function drop(e) {
+    console.log(e.target.closest("div"));
+
+    if (e.target.closest(".column")) {
+
+        let col = e.target.closest(".column");
+        const id = e.dataTransfer.getData('text/plain');
+        const draggable = document.getElementById(id);
+        draggable.classList.remove('hide');
+
+        let card = await getCard(id);
+        card.status = col.id.substring(5);
+        putCard(card, id);
+        loadCardsAndColumns();
+    }
+}
+
 // Converts the Json to HTML Object
-function createCardHtml(card){
+function createCardHtml(card) {
     let listItem = document.createElement("li");
 
     let div = document.createElement("div");
     div.id = card.id;
     div.class = "card";
 
+    div.setAttribute("draggable", "true");
+    div.addEventListener("dragstart", dragStart);
+
     let p = document.createElement("p");
     p.innerText = card.description;
-
     div.appendChild(p);
 
-    if(card.status == "ToDo"){
+    if (card.status == "ToDo") {
         let rightMoveButton = document.createElement("button");
         rightMoveButton.innerText = ">";
         rightMoveButton.addEventListener('click', listener => onRightMove(listener));
 
         div.appendChild(rightMoveButton);
-    }
-    else if(card.status == "Done") {
+    } else if (card.status == "Done") {
         let leftMoveButton = document.createElement("button");
         leftMoveButton.innerText = "<";
         leftMoveButton.addEventListener('click', listener => onLeftMove(listener));
-        
+
         div.appendChild(leftMoveButton);
-    }
-    else {
+    } else {
         let leftMoveButton = document.createElement("button");
         leftMoveButton.innerText = "<";
         leftMoveButton.addEventListener('click', listener => onLeftMove(listener));
@@ -161,7 +201,7 @@ function createCardHtml(card){
         div.appendChild(leftMoveButton);
         div.appendChild(rightMoveButton);
     }
-    
+
 
     let deleteButton = document.createElement("button");
     deleteButton.innerText = "X";
@@ -176,7 +216,7 @@ function createCardHtml(card){
 // Event Listener Functions
 
 // Event Listener Function to add new Card
-function onAddNewCard(listener){
+function onAddNewCard(listener) {
     let target = listener.target;
     let status = target.id.replace("addBtn", "");
     let description = document.getElementById(("add" + status)).value;
@@ -189,21 +229,20 @@ function onAddNewCard(listener){
 }
 
 // Function to delete one Card
-function onDeleteCard(listener){
+function onDeleteCard(listener) {
     let target = listener.target;
     let id = target.parentElement.id;
     deleteCard(id);
 }
 
-async function onLeftMove(listener){
+async function onLeftMove(listener) {
     let target = listener.target;
     let id = target.parentElement.id;
     let card = await getCard(id);
 
-    if(card.status == "in Progress"){
+    if (card.status == "in Progress") {
         card.status = "ToDo";
-    }
-    else if (card.status == "Done"){
+    } else if (card.status == "Done") {
         card.status = "in Progress";
     }
 
@@ -212,15 +251,14 @@ async function onLeftMove(listener){
     putCard(card, id);
 }
 
-async function onRightMove(listener){
+async function onRightMove(listener) {
     let target = listener.target;
     let id = target.parentElement.id;
     let card = await getCard(id);
 
-    if(card.status == "ToDo"){
+    if (card.status == "ToDo") {
         card.status = "in Progress";
-    }
-    else if (card.status == "in Progress"){
+    } else if (card.status == "in Progress") {
         card.status = "Done";
     }
 

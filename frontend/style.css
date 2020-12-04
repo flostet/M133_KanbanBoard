@@ -1,24 +1,32 @@
 * {
-  margin: 3;
-  font-family: "Roboto", sans-serif;
+    margin: 3;
+    font-family: "Roboto", sans-serif;
 }
 
 .FlexContainer {
-  display: flex;
-  flex-direction: row;
+    display: flex;
+    flex-direction: row;
 }
 
 .column {
-  flex: 33%;
-  width: auto;
-  padding: 0px 10px;
-  border-color: black;
+    flex: 33%;
+    width: auto;
+    padding: 0px 10px;
+    border-color: black;
 }
 
 button {
-  margin: 2px;
+    margin: 2px;
 }
 
 li {
-  list-style: none;
+    list-style: none;
+}
+
+.hide {
+    display: none;
+}
+
+.drag-over {
+    border: dashed 3px red;
 }
