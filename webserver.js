@@ -50,6 +50,7 @@ router
     })
     .delete("/cards/:id", context => {
         cards = cards.filter(c => c.id != context.params.id);
+        context.response.status = 200;
     })
     .put("/cards/:id", async context => {
         const card = await context.request.body({ type: "json" }).value;

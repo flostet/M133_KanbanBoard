@@ -1,10 +1,13 @@
+// Arrays for the JSON Files
 let cards = [];
 let columns = [];
 
+// Loads all Cards and Columns when window loads
 window.addEventListener('load', async () => {
     loadCardsAndColumns();
 });
 
+// Function to load all Cards and Columns
 async function loadCardsAndColumns(){
     columns = await getColumns();
     cards = await getCards();
@@ -18,10 +21,29 @@ async function loadCardsAndColumns(){
     createCards(cards);
 }
 
+// Function to add the Card to API 
 async function postCard(card){
     fetch('/cards', {
         method: 'post',
         headers: {'Content-Type': 'application/json' },
+        body: JSON.stringify(card)
+    });
+    
+    loadCardsAndColumns();
+}
+
+async function deleteCard(id){
+    fetch(`/cards/${id}`, {
+        method: 'delete',
+    });
+    
+    loadCardsAndColumns();
+}
+
+async function putCard(card, id){
+    fetch(`/cards/${id}`, {
+        method: 'put',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(card)
     });
     
@@ -60,7 +82,7 @@ function createColumn(column){
     let newCardButton = document.createElement("button");
     newCardButton.innerText = "+";
     newCardButton.id = "addBtn" + column.title;
-    newCardButton.addEventListener('click', listener => addNewCard(listener))
+    newCardButton.addEventListener('click', listener => onAddNewCard(listener))
     footer.appendChild(newCardButton);
 }
 
@@ -68,7 +90,6 @@ function createColumn(column){
 function createCards(cards){
     cards.forEach(card => {
         cardHtml = createCardHtml(card);
-        console.log(card.description);
         if(card.status == "ToDo"){
             document.getElementById("ToDo").appendChild(cardHtml);
         }
@@ -93,16 +114,21 @@ function createCardHtml(card){
 
     let deleteButton = document.createElement("button");
     deleteButton.innerText = "X";
-    deleteButton.addEventListener('click', listener => deleteCard(listener))
+    deleteButton.addEventListener('click', listener => onDeleteCard(listener));
 
     div.appendChild(p);
     div.appendChild(deleteButton);
+    div.appendChild(leftButton);
+    div.appendChild(rightButton);
 
     listItem.appendChild(div);
     return listItem;
 }
 
-function addNewCard(listener){
+// Event Listener Functions
+
+// Event Listener Function to add new Card
+function onAddNewCard(listener){
     let target = listener.target;
     let status = target.id.replace("addBtn", "");
     let description = document.getElementById(("add" + status)).value;
@@ -114,6 +140,14 @@ function addNewCard(listener){
     postCard(card);
 }
 
+// Function to delete one Card
+function onDeleteCard(listener){
+    let target = listener.target;
+    let id = target.parentElement.id;
+    deleteCard(id);
+}
+
+// Gets all Columns from API
 async function getColumns() {
     let response = await fetch('http://localhost:8000/columns', {
         method: 'GET',
@@ -121,6 +155,7 @@ async function getColumns() {
     return await response.json();
 }
 
+// Gets all Cards from API
 async function getCards() {
     let response = await fetch('http://localhost:8000/cards', {
         method: 'GET',
